@@ -1,0 +1,1244 @@
+@startuml
+namespace config {
+    class Config << (S,Aquamarine) >> {
+        + Server <font color=blue>struct</font>{uint16, bool, time.Duration, time.Duration, time.Duration, string}
+        + Debug <font color=blue>struct</font>{bool}
+        + Promexporter <font color=blue>struct</font>{bool, bool}
+        + Engine []*EngineInfo
+        + DBConfig SQLConfig
+        + FileStorage FileStorageConfig
+
+    }
+    class EngineInfo << (S,Aquamarine) >> {
+        + Mode []string
+        + Address string
+        + Account string
+        + Password string
+
+    }
+    class FileStorageConfig << (S,Aquamarine) >> {
+        + Address string
+        + SourceType string
+        + ExpireDay int64
+        + AppId int64
+        + UserId int64
+
+    }
+    class SQLConfig << (S,Aquamarine) >> {
+        + DbType string
+        + Username string
+        + Password string
+        + PwdEnc bool
+        + Host string
+        + Port int
+        + Database string
+        + MaxOpenConns int
+        + MaxIdleConns int
+        + ConnMaxLifetime int
+        + EnableDebug bool
+
+    }
+    class config.EngineMode << (T, #FF7700) >>  {
+    }
+}
+
+
+namespace dao {
+    class APIFileStorer << (S,Aquamarine) >> {
+        + MarshalJSON() ([]byte, error)
+        + String() string
+
+    }
+    class APIMapFileType << (S,Aquamarine) >> {
+        + String() string
+        + MarshalJSON() ([]byte, error)
+        + UnmarshalJSON(data []byte) error
+
+    }
+    class APIMapSourceType << (S,Aquamarine) >> {
+        + String() string
+        + MarshalJSON() ([]byte, error)
+        + UnmarshalJSON(data []byte) error
+
+    }
+    class APIMapStatus << (S,Aquamarine) >> {
+        + Less(other APIMapStatus) bool
+        + CanChange(to APIMapStatus) bool
+        + String() string
+        + MarshalJSON() ([]byte, error)
+        + UnmarshalJSON(data []byte) error
+
+    }
+    class APIMapType << (S,Aquamarine) >> {
+        + MarshalJSON() ([]byte, error)
+
+    }
+    class APISensorType << (S,Aquamarine) >> {
+        + String() string
+        + MarshalJSON() ([]byte, error)
+        + UnmarshalJSON(data []byte) error
+
+    }
+    class CameraIntrinsics << (S,Aquamarine) >> {
+        + Fx float64
+        + Fy float64
+        + Ox float64
+        + Oy float64
+        + K1 float64
+        + K2 float64
+        + P1 float64
+        + P2 float64
+
+        + Scan(value <font color=blue>interface</font>{}) error
+        + IsZero() bool
+        + Value() (driver.Value, error)
+        + Valid() bool
+        + String() string
+
+    }
+    class Coordinates << (S,Aquamarine) >> {
+        + Origin *Origin
+        + Quaternion *Quaternion
+        + Scale *Scale
+
+        + Scan(value <font color=blue>interface</font>{}) error
+        + Value() (driver.Value, error)
+        + String() string
+
+    }
+    class DBFileStorer << (S,Aquamarine) >> {
+        + Url string
+        + Name string
+        + Sha256 string
+        + FileSize int64
+        + FileKey string
+        + FileAppId int64
+        + Service string
+
+        + Scan(value <font color=blue>interface</font>{}) error
+        + IsZero() bool
+        + Value() (driver.Value, error)
+
+    }
+    class DBModelMetaData << (S,Aquamarine) >> {
+        + StoredID int64
+        + ModelType DBMapFileType
+        + ModelFile *DBFileStorer
+
+    }
+    class GPSPose << (S,Aquamarine) >> {
+        + Altitude float64
+        + Latitude float64
+        + Longitude float64
+
+        + Scan(value <font color=blue>interface</font>{}) error
+        + IsZero() bool
+        + Value() (driver.Value, error)
+
+    }
+    class ImageJsonFileContent << (S,Aquamarine) >> {
+        + URI string
+
+        + MarshalJSON() ([]byte, error)
+
+    }
+    class ImageJsonForContruct << (S,Aquamarine) >> {
+        + Intrinsics *CameraIntrinsics
+        + CameraPose *LocalizationPose
+        + GPSPose *GPSPose
+        + Index int
+        + Name string
+        + SourceType APIMapSourceType
+        + SensorType APISensorType
+
+    }
+    class LocalizationPose << (S,Aquamarine) >> {
+        + Position []float64
+        + Rotation []float64
+
+        + Scan(value <font color=blue>interface</font>{}) error
+        + Value() (driver.Value, error)
+        + SetPosition(x float64, y float64, z float64) 
+        + SetRotation(r00 float64, r01 float64, r02 float64, r10 float64, r11 float64, r12 float64, r20 float64, r21 float64, r22 float64) 
+        + SetQuaternion(x float64, y float64, z float64, w float64) 
+        + String() string
+
+    }
+    class dao.APIFileStorer << (T, #FF7700) >>  {
+    }
+    class dao.APIMapFileType << (T, #FF7700) >>  {
+    }
+    class dao.APIMapSourceType << (T, #FF7700) >>  {
+    }
+    class dao.APIMapStatus << (T, #FF7700) >>  {
+    }
+    class dao.APIMapType << (T, #FF7700) >>  {
+    }
+    class dao.APISensorType << (T, #FF7700) >>  {
+    }
+    class dao.DBMapFileType << (T, #FF7700) >>  {
+    }
+    class dao.DBMapStatus << (T, #FF7700) >>  {
+    }
+    class dao.DBMapType << (T, #FF7700) >>  {
+    }
+    class dao.DBSensorType << (T, #FF7700) >>  {
+    }
+    class dao.Origin << (T, #FF7700) >>  {
+    }
+    class dao.Quaternion << (T, #FF7700) >>  {
+    }
+    class dao.Scale << (T, #FF7700) >>  {
+    }
+}
+"dao.ImageJsonForContruct" *-- "dao.ImageJsonFileContent"
+
+
+namespace dbg {
+    class DBConnection << (S,Aquamarine) >> {
+        - db *gorm.DB
+
+        + RegisterDB(cfg *config.SQLConfig) error
+        + GetDB() *gorm.DB
+
+    }
+    class gormLogger << (S,Aquamarine) >> {
+        - infoStr string
+        - traceStr string
+
+        + LogMode(level logger.LogLevel) logger.Interface
+        + Info(ctx context.Context, msg string, data ...<font color=blue>interface</font>{}) 
+        + Warn(ctx context.Context, msg string, data ...<font color=blue>interface</font>{}) 
+        + Error(ctx context.Context, msg string, data ...<font color=blue>interface</font>{}) 
+        + Trace(ctx context.Context, begin time.Time, fc <font color=blue>func</font>() (string, int64), err error) 
+
+    }
+}
+"logger.Config" *-- "dbg.gormLogger"
+
+
+namespace engine {
+    class FpsClient << (S,Aquamarine) >> {
+        - address string
+        - imsAddress string
+        - final <font color=blue>chan</font> <font color=blue>struct</font>{}
+        - constructRequst <font color=blue>chan</font> *constructMapMsg
+
+        - getMetaData(taskId string, urlPath string) (*MapMetaData, error)
+        - doConstruct() 
+        - startStitchMap(id int64, mapList []*ImageMetaData) (string, error)
+        - startMapConstruction(id int64, name string, images []*ImageMetaData, oldMap *ImageMetaData) (string, error)
+
+        + Start() 
+        + Stop() 
+        + String() string
+        + SetImsInfo(addr string, token string) 
+        + Address() string
+        + Token() string
+        + Version() (string, error)
+        + LocalizeImage(imageB64 string, intrins *dao.CameraIntrinsics, mapMetas ...*MapMetaBase) (*LocalizationPoseResult, error)
+        + ListJobs() ([]*MapJob, error)
+        + GetMetaData(taskId string) (*MapMetaData, error)
+        + DowloadMap(mapId int64, cb DownloadCallback) error
+        + DowloadTexturedMesh(mapId int64, cb DownloadCallback) error
+        + DowloadDensePoints(mapId int64, cb DownloadCallback) error
+        + DowloadSparsePoints(mapId int64, cb DownloadCallback) error
+        + LocalizeVideoCreate(cbURL string, videoURL string, intrins *dao.CameraIntrinsics, mapMetas ...*MapMetaBase) (string, error)
+        + Video2ImageCreate(cbURL string, videoURL string) (string, error)
+        + LocalizeVideoDelete(taskId string) error
+        + LocalizeVideoCheck(taskId string) (*TaskMetaData, error)
+        + StitchMap(mapID int64, mapList ...*ImageMetaData) (<font color=blue>chan</font> *MapMetaBase, error)
+        + ConstructMap(meta *MapMetaData) (<font color=blue>chan</font> *MapMetaBase, error)
+
+    }
+    class ImageMetaData << (S,Aquamarine) >> {
+        + UniqueIndex int
+        + MapId int64
+        + ImageFile *dao.APIFileStorer
+        + FileName string
+        + SourceFileID int64
+        + SourceMapID int64
+        + CameraIntrins *dao.CameraIntrinsics
+        + CameraPose *dao.LocalizationPose
+        + Gps *dao.GPSPose
+        + Sensor dao.APISensorType
+        + CreatedAt time.Time
+        + RawContent string
+        + LocPose *dao.LocalizationPose
+
+        + IsVideo() bool
+        + IsImage() bool
+
+    }
+    interface ImagePositioner  {
+        + LocalizeImage(imageB64 string, intrins *dao.CameraIntrinsics, mapMetas ...*MapMetaBase) (*LocalizationPoseResult, error)
+
+    }
+    class ImsClient << (S,Aquamarine) >> {
+        - address string
+        - token string
+        - uid int64
+        - bank int
+        - final <font color=blue>chan</font> <font color=blue>struct</font>{}
+        - constructRequst <font color=blue>chan</font> *constructMapMsg
+
+        - login(email string, password string) error
+        - doConstruct() 
+        - startMapConstruction(id int64, name string, images []*ImageMetaData) (int64, error)
+        - clear() error
+        - captureB64(index int, imageB64 string, pose *dao.LocalizationPose, camera *dao.CameraIntrinsics) error
+        - construct(name string, windowSize int, featureCount int, preservePoses bool) (int64, error)
+        - restore() error
+        - delete() error
+
+        + Start() 
+        + Stop() 
+        + String() string
+        + IsLogined() bool
+        + Address() string
+        + Token() string
+        + Version() (string, error)
+        + ListJobs() ([]*MapJob, error)
+        + GetMetaData(mapOrTaskId string) (*MapMetaData, error)
+        + DowloadMap(mapId int64, cb DownloadCallback) error
+        + DowloadTexturedMesh(mapId int64, cb DownloadCallback) error
+        + DowloadDensePoints(mapId int64, cb DownloadCallback) error
+        + DowloadSparsePoints(mapId int64, cb DownloadCallback) error
+        + LocalizeImage(imageB64 string, intrins *dao.CameraIntrinsics, mapMetas ...*MapMetaBase) (*LocalizationPoseResult, error)
+        + GetPoses(mapId int64) error
+        + StitchMap(mapId int64, mapList ...*ImageMetaData) (<font color=blue>chan</font> *MapMetaBase, error)
+        + ConstructMap(meta *MapMetaData) (<font color=blue>chan</font> *MapMetaBase, error)
+        + LocalizeVideoCreate(cbURL string, videoURL string, intrins *dao.CameraIntrinsics, mapMetas ...*MapMetaBase) (string, error)
+        + LocalizeVideoDelete(taskId string) error
+        + LocalizeVideoCheck(taskId string) (*TaskMetaData, error)
+        + Video2ImageCreate(cbURL string, videoURL string) (string, error)
+
+    }
+    class LocalizationPoseResult << (S,Aquamarine) >> {
+        + Confidence TriDigits
+        + MapId int64
+        + Pose *dao.LocalizationPose
+
+    }
+    class LocationTaskStatus << (S,Aquamarine) >> {
+        + String() string
+        + MarshalJSON() ([]byte, error)
+
+    }
+    interface MapConstuctor  {
+        + ConstructMap(meta *MapMetaData) (<font color=blue>chan</font> *MapMetaBase, error)
+        + StitchMap(mapId int64, mapList ...*ImageMetaData) (<font color=blue>chan</font> *MapMetaBase, error)
+
+    }
+    interface MapEngine  {
+        + LocalizeImage(imageB64 string, intrins *dao.CameraIntrinsics, mapMetas ...*MapMetaBase) (*LocalizationPoseResult, error)
+        + Address() string
+        + LocalizeVideoCreate(cbURL string, videoURL string, intrins *dao.CameraIntrinsics, mapMetas ...*MapMetaBase) (string, error)
+        + LocalizeVideoDelete(taskId string) error
+        + LocalizeVideoCheck(taskId string) (*TaskMetaData, error)
+        + Video2ImageCreate(cbURL string, videoURL string) (string, error)
+        + Token() string
+        + Version() (string, error)
+        + ListJobs() ([]*MapJob, error)
+        + GetMetaData(mapOrTask string) (*MapMetaData, error)
+        + DowloadMap(mapId int64, cb DownloadCallback) error
+        + DowloadTexturedMesh(mapId int64, cb DownloadCallback) error
+        + DowloadDensePoints(mapId int64, cb DownloadCallback) error
+        + DowloadSparsePoints(mapId int64, cb DownloadCallback) error
+        + ConstructMap(meta *MapMetaData) (<font color=blue>chan</font> *MapMetaBase, error)
+        + StitchMap(mapId int64, mapList ...*ImageMetaData) (<font color=blue>chan</font> *MapMetaBase, error)
+        + Start() 
+        + Stop() 
+
+    }
+    interface MapGetter  {
+        + Address() string
+        + Token() string
+        + Version() (string, error)
+        + ListJobs() ([]*MapJob, error)
+        + GetMetaData(mapOrTask string) (*MapMetaData, error)
+        + DowloadMap(mapId int64, cb DownloadCallback) error
+        + DowloadTexturedMesh(mapId int64, cb DownloadCallback) error
+        + DowloadDensePoints(mapId int64, cb DownloadCallback) error
+        + DowloadSparsePoints(mapId int64, cb DownloadCallback) error
+
+    }
+    class MapIdArray << (S,Aquamarine) >> {
+        + String() string
+
+    }
+    class MapJob << (S,Aquamarine) >> {
+        + Id int64
+        + Name string
+        + Status dao.APIMapStatus
+        + Type int
+        + Version string
+        + Size int
+        + Privacy int
+        + Creator int64
+        + Created time.Time
+        + Modified time.Time
+        + Sha256Al string
+        + Sha256Sparse string
+        + Sha256Dense string
+        + Sha256Tex string
+
+    }
+    class MapMetaBase << (S,Aquamarine) >> {
+        + ID int64
+        + Status dao.APIMapStatus
+        + EngineType VpsType
+        + FpsID string
+        + ImsID int64
+        + MapFile *dao.APIFileStorer
+        + ModelFile *dao.APIFileStorer
+        + LocalizeThreshold *float32
+
+    }
+    class MapMetaData << (S,Aquamarine) >> {
+        + Name string
+        + Type dao.APIMapType
+        + CreatedAt int64
+        + Version string
+        + Creator int64
+        + Privacy int
+        + Size int
+        + GPS *dao.GPSPose
+        + Origin *dao.Origin
+        + Quaternion *dao.Quaternion
+        + Scale *dao.Scale
+        + Sparse *dao.APIFileStorer
+        + Dense *dao.APIFileStorer
+        + Tex *dao.APIFileStorer
+        + Images []*ImageMetaData
+        + Models []*ModelMetaData
+        + AppId string
+        + CorpId string
+
+    }
+    class ModelMetaData << (S,Aquamarine) >> {
+        + MapId int64
+        + FileID int64
+        + FileName string
+        + ModelType dao.APIMapFileType
+        + ModelFile *dao.APIFileStorer
+
+    }
+    class TaskMetaData << (S,Aquamarine) >> {
+        + CreatedAt time.Time
+        + UpdatedAt time.Time
+        + SuccessRate TriDigits
+        + ResultFile *dao.APIFileStorer
+        + AppId string
+        + CorpId string
+        + Message string
+
+    }
+    class TriDigits << (S,Aquamarine) >> {
+        + MarshalJSON() ([]byte, error)
+        + UnmarshalJSON(data []byte) error
+
+    }
+    interface VideoDecoder  {
+        + Address() string
+        + Video2ImageCreate(cbURL string, videoURL string) (string, error)
+        + LocalizeVideoDelete(taskId string) error
+        + LocalizeVideoCheck(taskId string) (*TaskMetaData, error)
+
+    }
+    class VideoLocationTask << (S,Aquamarine) >> {
+        + TaskID int64
+        + BackendID string
+        + EngineType VpsType
+        + FileVideo dao.APIFileStorer
+        + Status LocationTaskStatus
+        + Request string
+        + BackendAddr string
+
+    }
+    interface VideoPositioner  {
+        + Address() string
+        + LocalizeVideoCreate(cbURL string, videoURL string, intrins *dao.CameraIntrinsics, mapMetas ...*MapMetaBase) (string, error)
+        + LocalizeVideoDelete(taskId string) error
+        + LocalizeVideoCheck(taskId string) (*TaskMetaData, error)
+
+    }
+    class VpsType << (S,Aquamarine) >> {
+        + Valid() bool
+
+    }
+    class constructMapMsg << (S,Aquamarine) >> {
+        - meta *MapMetaData
+        - resp <font color=blue>chan</font> *MapMetaBase
+        - ctx context.Context
+
+        + SetContextValue(k <font color=blue>interface</font>{}, v <font color=blue>interface</font>{}) 
+        + ContextValue(k <font color=blue>interface</font>{}) <font color=blue>interface</font>{}
+
+    }
+    class engine.DownloadCallback << (T, #FF7700) >>  {
+    }
+    class engine.LocationTaskStatus << (T, #FF7700) >>  {
+    }
+    class engine.MapIdArray << (T, #FF7700) >>  {
+    }
+    class engine.TriDigits << (T, #FF7700) >>  {
+    }
+    class engine.VideoTaskType << (T, #FF7700) >>  {
+    }
+    class engine.VpsType << (T, #FF7700) >>  {
+    }
+    class engine.imsRequestErrors << (T, #FF7700) >>  {
+    }
+    class fpsFile << (S,Aquamarine) >> {
+        + URI string
+        + Sha256 string
+        + Name string
+
+    }
+    class fpsLocalizeFpsMapObj << (S,Aquamarine) >> {
+        + MapURL string
+        + ModelURL string
+
+    }
+    class fpsLocalizeImsMapObj << (S,Aquamarine) >> {
+        + Address string
+        + MapID int64
+        + Token string
+
+    }
+    class fpsLocalizeMapItem << (S,Aquamarine) >> {
+        + Type VpsType
+        + MapID int64
+        + Fps *fpsLocalizeFpsMapObj
+        + Ims *fpsLocalizeImsMapObj
+
+    }
+}
+"engine.MapGetter" *-- "engine.MapConstuctor"
+"engine.MapMetaBase" *-- "engine.MapMetaData"
+"engine.VideoLocationTask" *-- "engine.TaskMetaData"
+
+"engine.ImagePositioner" <|-- "engine.FpsClient"
+"engine.MapConstuctor" <|-- "engine.FpsClient"
+"engine.MapEngine" <|-- "engine.FpsClient"
+"engine.MapGetter" <|-- "engine.FpsClient"
+"engine.VideoDecoder" <|-- "engine.FpsClient"
+"engine.VideoPositioner" <|-- "engine.FpsClient"
+"engine.ImagePositioner" <|-- "engine.ImsClient"
+"engine.MapConstuctor" <|-- "engine.ImsClient"
+"engine.MapEngine" <|-- "engine.ImsClient"
+"engine.MapGetter" <|-- "engine.ImsClient"
+"engine.VideoDecoder" <|-- "engine.ImsClient"
+"engine.VideoPositioner" <|-- "engine.ImsClient"
+
+namespace fsm {
+    interface EnumEvent  {
+        + Event() uint16
+        + String() string
+
+    }
+    interface EnumState  {
+        + State() uint16
+        + String() string
+
+    }
+    class Event << (S,Aquamarine) >> {
+        - event EnumEvent
+        - srcState EnumState
+        - dstState EnumState
+        - fsm *FSM
+        - ctx context.Context
+
+        + Err error
+        + Args []<font color=blue>interface</font>{}
+
+        + String() string
+        + SetContextValue(k <font color=blue>interface</font>{}, v <font color=blue>interface</font>{}) 
+        + ContextValue(k <font color=blue>interface</font>{}) <font color=blue>interface</font>{}
+        + Event() EnumEvent
+        + SrcState() EnumState
+        + DstState() EnumState
+
+    }
+    class FSM << (S,Aquamarine) >> {
+        - transitions <font color=blue>map</font>[evtKey]EnumState
+        - callbacks <font color=blue>map</font>[callKey]Callback
+
+        + RegistErr error
+
+        - getCallback(target uint16, callType callbackType) (Callback, bool)
+        - registCallback(target uint16, t callbackType, cb Callback) 
+        - doTransition(e *Event) 
+
+        + RegistTransition(src EnumState, dest EnumState, event EnumEvent) 
+        + RegistCallback(target uint16, t callbackType, cb Callback) 
+        + RegistCallbacks(callbackRegister Register) 
+        + NextState(src EnumState, event EnumEvent) (EnumState, bool)
+        + Transition(ctx context.Context, src EnumState, event EnumEvent, args ...<font color=blue>interface</font>{}) *Event
+
+    }
+    class InternalError << (S,Aquamarine) >> {
+        + Err error
+
+        + Error() string
+
+    }
+    class InvalidEventError << (S,Aquamarine) >> {
+        + EEvent EnumEvent
+        + EState EnumState
+
+        + Error() string
+
+    }
+    interface Logger  {
+        + Error(format <font color=blue>interface</font>{}, args ...<font color=blue>interface</font>{}) error
+        + Info(format <font color=blue>interface</font>{}, args ...<font color=blue>interface</font>{}) 
+
+    }
+    class NoTransitionHappenedError << (S,Aquamarine) >> {
+        + Err error
+
+        + Error() string
+
+    }
+    class RegistCallbackError << (S,Aquamarine) >> {
+        - methodName string
+
+        + Error() string
+
+    }
+    class RegistTransitionError << (S,Aquamarine) >> {
+        - src EnumState
+        - event EnumEvent
+
+        + Error() string
+
+    }
+    interface Register  {
+        + GetEventByMethodName( string) (EnumEvent, bool)
+        + GetStateByMethodName( string) (EnumState, bool)
+
+    }
+    class UnknownEventError << (S,Aquamarine) >> {
+        + EEvent EnumEvent
+
+        + Error() string
+
+    }
+    class callKey << (S,Aquamarine) >> {
+        - target uint16
+        - callType callbackType
+
+    }
+    class callbackType << (S,Aquamarine) >> {
+        + String() string
+
+    }
+    class emptyLogger << (S,Aquamarine) >> {
+        + Error( <font color=blue>interface</font>{},  ...<font color=blue>interface</font>{}) error
+        + Info( <font color=blue>interface</font>{},  ...<font color=blue>interface</font>{}) 
+
+    }
+    class evtKey << (S,Aquamarine) >> {
+        - source uint16
+        - event uint16
+
+    }
+    class fsm.Callback << (T, #FF7700) >>  {
+    }
+    class fsm.callbackType << (T, #FF7700) >>  {
+    }
+}
+
+"fsm.Logger" <|-- "fsm.emptyLogger"
+
+namespace main {
+    class ArrayFileInfo << (S,Aquamarine) >> {
+        + Less(i int, j int) bool
+        + Len() int
+        + Swap(i int, j int) 
+
+    }
+    class MapMetaLoaderTask << (S,Aquamarine) >> {
+        + State MapMetasLoaderTaskState
+        + ZipFilepath string
+
+    }
+    class MapMetasLoaderTaskState << (S,Aquamarine) >> {
+        + String() string
+
+    }
+    class app << (S,Aquamarine) >> {
+        - mainSvr *service.Server
+
+        + Name() string
+        + Version() string
+        + Configure() <font color=blue>interface</font>{}
+        + OnStart() bool
+        + OnEnd() 
+
+    }
+    class ginDebugLogger << (S,Aquamarine) >> {
+        + Write(p []byte) (int, error)
+
+    }
+    class main.ArrayFileInfo << (T, #FF7700) >>  {
+    }
+    class main.MapMetasLoaderTaskState << (T, #FF7700) >>  {
+    }
+    class mapMetasLoader << (S,Aquamarine) >> {
+        - final <font color=blue>chan</font> <font color=blue>struct</font>{}
+        - imagesZip sync.Map
+
+        - doInterval() int
+        - parseName(key string) (string, int64)
+        - genName(remote string, mapID int64) string
+
+        + Load(key string) string
+        + LoadOrCreate(remote string, mapID int64) (*MapMetaLoaderTask, error)
+
+    }
+    class thumbImagesLoader << (S,Aquamarine) >> {
+        - final <font color=blue>chan</font> <font color=blue>struct</font>{}
+
+        - saveFile(name string, buf []byte) error
+        - genName(urlPath string) string
+        - doInterval() int
+
+        + Load(name string) []byte
+        + Save(name string, buf []byte) error
+        + Stop() 
+        + Start() 
+
+    }
+    class "[]fs.FileInfo" as fsFileInfo {
+        'This class was created so that we can correctly have an alias pointing to this name. Since it contains dots that can break namespaces
+    }
+}
+
+
+namespace pgtb {
+    class Duration << (S,Aquamarine) >> {
+        + MarshalJSON() ([]byte, error)
+
+    }
+    class MapIdArray << (S,Aquamarine) >> {
+        + Scan(value <font color=blue>interface</font>{}) error
+        + Value() (driver.Value, error)
+
+    }
+    class TbAccount << (S,Aquamarine) >> {
+        + Account string
+        + Password string
+        + LoginAddress string
+        + Token string
+        + UserId uint64
+        + CreatedAt time.Time
+        + UpdatedAt time.Time
+
+        + TableName() string
+
+    }
+    class TbLocationTask << (S,Aquamarine) >> {
+        + TaskId int64
+        + BackendId string
+        + EngineType string
+        + Creator int64
+        + CorpId string
+        + AppId string
+        + FileVideo *dao.DBFileStorer
+        + Status int
+        + SuccessRate float64
+        + FileResult *dao.DBFileStorer
+        + BackendAddr string
+        + Request string
+        + Message string
+
+        + TableName() string
+
+    }
+    class TbMapInfo << (S,Aquamarine) >> {
+        + ID int64
+        + Name string
+        + EngineType string
+        + EngineVer string
+        + MapType dao.DBMapType
+        + Creator int64
+        + Status dao.DBMapStatus
+        + Size int
+        + CorpId string
+        + AppId string
+        + ImsId int64
+        + ImsCreator int64
+        + Altitude float64
+        + Latitude float64
+        + Longitude float64
+        + Coordinates *dao.Coordinates
+        + FileAl *dao.DBFileStorer
+        + FileSparse *dao.DBFileStorer
+        + FileDense *dao.DBFileStorer
+        + FileTex *dao.DBFileStorer
+        + FileModel *dao.DBFileStorer
+        + LocalizeThreshold *float32
+        + Images []TbMapSourceInfo
+        + Models []TbMapModelInfo
+
+        + TableName() string
+        + BeforeUpdate(tx *gorm.DB) error
+        + BeforeCreate(tx *gorm.DB) error
+
+    }
+    class TbMapModelInfo << (S,Aquamarine) >> {
+        + FileName string
+        + MapId int64
+        + FileType dao.DBMapFileType
+        + FileID int64
+        + FileSource *TbSourceFile
+
+        + TableName() string
+
+    }
+    class TbMapSourceInfo << (S,Aquamarine) >> {
+        + Index int
+        + MapId int64
+        + CreatedFrom int
+        + FileType dao.DBMapFileType
+        + FileName string
+        + FileID int64
+        + FileSource *TbSourceFile
+        + SourceMapID int64
+        + SourceMapInfo *TbMapInfo
+        + LocPose *dao.LocalizationPose
+
+        - setDefault(tx *gorm.DB) error
+        - doUpdateTbMapInfoSize(tx *gorm.DB) error
+
+        + IsVideo() bool
+        + TableName() string
+        + BeforeCreate(tx *gorm.DB) error
+        + AfterCreate(tx *gorm.DB) error
+        + AfterDelete(tx *gorm.DB) error
+
+    }
+    class TbOpenAPITask << (S,Aquamarine) >> {
+        + ID uint
+        + CreatedAt time.Time
+        + UpdatedAt time.Time
+        + Cost Duration
+        + Request string
+        + Maps MapIdArray
+        + Image string
+        + Thumbnail string
+        + Confidence float32
+        + Matched MapIdArray
+        + LocPose *dao.LocalizationPose
+        + Message string
+
+        + TableName() string
+
+    }
+    class TbSourceFile << (S,Aquamarine) >> {
+        + ID int64
+        + FileInfo *dao.DBFileStorer
+        + FileHash string
+        + FileExt string
+        + SourceID int64
+        + SensorType dao.DBSensorType
+        + Intrinsics *dao.CameraIntrinsics
+        + CameraPose *dao.LocalizationPose
+        + GPSPose *dao.GPSPose
+        + RawContent string
+
+        + TableName() string
+
+    }
+    class pgtb.Duration << (T, #FF7700) >>  {
+    }
+    class pgtb.MapIdArray << (T, #FF7700) >>  {
+    }
+    class "time.Duration" as timeDuration {
+        'This class was created so that we can correctly have an alias pointing to this name. Since it contains dots that can break namespaces
+    }
+}
+"gorm.Model" *-- "pgtb.TbLocationTask"
+"gorm.Model" *-- "pgtb.TbMapInfo"
+"gorm.Model" *-- "pgtb.TbMapModelInfo"
+"gorm.Model" *-- "pgtb.TbMapSourceInfo"
+"gorm.Model" *-- "pgtb.TbSourceFile"
+
+
+namespace service {
+    class BaseRes << (S,Aquamarine) >> {
+        + ErrorCode int
+        + ErrorMsg string
+
+    }
+    class CommonRes << (S,Aquamarine) >> {
+        + Data <font color=blue>interface</font>{}
+
+        + SetResMsg(code int, msgs ...string) 
+        + SetResError(code int, err error) error
+
+    }
+    class EngineInfo << (S,Aquamarine) >> {
+        + Type engine.VpsType
+        + Address string
+        + Account string
+        + Password string
+
+    }
+    class EngineMgr << (S,Aquamarine) >> {
+        - impls <font color=blue>map</font>[string]*engineImplInfo
+        - lk sync.Mutex
+
+        - typeToEngineMode(t engine.VpsType) EngineMode
+
+        + CheckAndClear() 
+        + GetEngine(modeAndPerms EngineMode) engine.MapEngine
+        + GetEngineByPermsAny(t engine.VpsType, perms ...EngineMode) engine.MapEngine
+        + GetEngineByPerm(t engine.VpsType, perm EngineMode) engine.MapEngine
+        + DelEngine(key string) 
+        + AddEngine(e EngineInfo, mode EngineMode) (int, bool)
+
+    }
+    class EngineMode << (S,Aquamarine) >> {
+        - merge(other EngineMode) error
+
+        + String() string
+        + Perms() EngineMode
+        + Types() EngineMode
+        + HasImagePerm() bool
+        + HasVideoPerm() bool
+        + HasMapPerm() bool
+        + Has(permission EngineMode) bool
+
+    }
+    class Server << (S,Aquamarine) >> {
+        - cfg config.Config
+        - final <font color=blue>chan</font> <font color=blue>struct</font>{}
+        - svr *http.Server
+        - engines *EngineMgr
+
+        - onWebapiMapDemo(c *gin.Context) 
+        - onOpenApiTaskList(c *gin.Context) 
+        - onOpenApiTaskImage(c *gin.Context) 
+        - onWebapiFileThumb(c *gin.Context) 
+        - onLocationTaskCreate(c *gin.Context) 
+        - onLocationTaskDelete(c *gin.Context) 
+        - onLocationTaskList(c *gin.Context) 
+        - onLocationTaskGet(c *gin.Context) 
+        - onOpenapiLocationImage(c *gin.Context) 
+        - onSyncMapInfoFromIms(c *gin.Context) 
+        - doSyncMapInfoFromIms(syncALL bool) error
+        - onGetTokenForIms(c *gin.Context) 
+        - onApiMapCreate(c *gin.Context) 
+        - onApiMapDelete(c *gin.Context) 
+        - onApiMapUploadImage(c *gin.Context) 
+        - onApiMapUploadVideo(c *gin.Context) 
+        - onApiMapClear(c *gin.Context) 
+        - onApiMapConstruct(c *gin.Context) 
+        - resumeMapConstruction() 
+        - onApiMapStatus(c *gin.Context) 
+        - onApiMapRestore(c *gin.Context) 
+        - onApiMapList(c *gin.Context) 
+        - onApiMapMetaget(c *gin.Context) 
+        - onApiMapMetaset(c *gin.Context) 
+        - onApiMapStitch(c *gin.Context) 
+        - onApiMapReset(c *gin.Context) 
+        - genLocationCallbackAddressFor(taskId int64) string
+        - genDecodeCallbackAddressFor(taskId int64) string
+        - getMapGetter(vpsType engine.VpsType) engine.MapGetter
+        - getMapConstuctor(vpsType engine.VpsType) engine.MapConstuctor
+        - getImagePositioner(vpsType engine.VpsType) engine.ImagePositioner
+        - getVideoPositioner() engine.VideoPositioner
+        - getVideoDecoder() engine.VideoDecoder
+        - setAllowOrigin(w http.ResponseWriter) 
+        - parseAppId(c *gin.Context) string
+        - onCallbackVideoDecode(c *gin.Context) 
+        - onCallbackVideoLocation(c *gin.Context) 
+        - checkRecentTasks() 
+
+        + Start() error
+        + Stop() 
+
+    }
+    class engineImplInfo << (S,Aquamarine) >> {
+        - modeAndPerms EngineMode
+        - vpsType engine.VpsType
+        - address string
+        - bank int
+        - impl engine.MapEngine
+        - available bool
+        - lastCheck time.Time
+
+        - checkCreate() error
+
+    }
+    class ginDebugLogger << (S,Aquamarine) >> {
+        + Write(p []byte) (int, error)
+
+    }
+    class service.EngineMode << (T, #FF7700) >>  {
+    }
+    class taskInfo << (S,Aquamarine) >> {
+        - ctx context.Context
+        - cancel context.CancelFunc
+
+        - setContextValue(k <font color=blue>interface</font>{}, v <font color=blue>interface</font>{}) 
+
+    }
+    class tasksMgr << (S,Aquamarine) >> {
+        - tasks <font color=blue>map</font>[int64]*taskInfo
+        - lk sync.Mutex
+
+        - clear() 
+        - getTask(id int64) *taskInfo
+        - addTask(id int64, backendID string) bool
+        - delTask(id int64) bool
+
+    }
+}
+"service.BaseRes" *-- "service.CommonRes"
+
+
+namespace storage {
+    class FileMeta << (S,Aquamarine) >> {
+        + Url string
+        + FileName string
+        + FileSize int64
+        + FileKey string
+        + Sha256 string
+
+    }
+    class FileStorage << (S,Aquamarine) >> {
+        - appId int64
+        - expireDay int64
+        - source StorageSourceType
+        - svrHost string
+
+        - genPresignedPolicy(ctx context.Context, fname string) (*storagePresignedPolicy, error)
+        - doUploadFile(ctx context.Context, fname string, fdata io.Reader) (string, error)
+        - doMultipartUpload(ctx context.Context, fname string, fpath string, md5sum string) (string, error)
+        - getFileMeta(ctx context.Context, key string) (*FileMeta, error)
+        - deleteFile(ctx context.Context, fileKey string) error
+
+        + GetFileThumb(ctx context.Context, fileKey string, w int, h int) ([]byte, error)
+        + UploadFileByFile(ctx context.Context, fname string, fpath string) (*FileMeta, error)
+        + UploadFileByBuffer(ctx context.Context, fname string, fdata []byte) (*FileMeta, error)
+        + DeleteFileByKey(ctx context.Context, fileKey string) error
+        + DeleteFileByURL(ctx context.Context, fileURL string) error
+        + GetFileThumbByURL(ctx context.Context, fileURL string, w int, h int) ([]byte, error)
+
+    }
+    class StorageSourceType << (S,Aquamarine) >> {
+        + Valid() bool
+
+    }
+    class fChunk << (S,Aquamarine) >> {
+        + PartNumber int
+        + UploadURL string
+
+    }
+    class storage.StorageSourceType << (T, #FF7700) >>  {
+    }
+    class storagePresignedPolicy << (S,Aquamarine) >> {
+        + Url string
+        + Bucket string
+        + Key string
+        + Policy string
+        + XamzAlgorithm string
+        + XamzCredential string
+        + XamzDate string
+        + XamzSignature string
+        + SuccessActionRedirect string
+        + ContentType string
+
+    }
+}
+
+
+namespace syncer {
+    class imsSyncer << (S,Aquamarine) >> {
+        - me engine.MapGetter
+
+        + DoSync(syncALL bool) error
+
+    }
+    class sourceFileSyncer << (S,Aquamarine) >> {
+        + DoSync(syncALL bool) error
+
+    }
+}
+
+
+namespace task {
+    class CallbackInfo << (S,Aquamarine) >> {
+        - ctx context.Context
+        - cancel context.CancelFunc
+
+    }
+    class MapConstructer << (S,Aquamarine) >> {
+        - stateMu sync.Mutex
+        - state MapTaskStatus
+        - eventMu sync.Mutex
+        - isTransition bool
+        - meta *engine.MapMetaData
+        - callbackTasks sync.Map
+        - constructType int
+
+        - syncBaseMetaFromDB() 
+        - runVideoDecodeTask(wg *sync.WaitGroup, videoMeta *engine.ImageMetaData, decoder engine.VideoDecoder) 
+        - addImage(raw *RawUploadInfo) error
+        - canUploadSource(t int) bool
+        - handleDecodeSucceed(info *CallbackInfo, raw *RawDecodeResult) error
+
+        + Meta() engine.MapMetaData
+        + State() dao.APIMapStatus
+        + GetStateByMethodName(name string) (fsm.EnumState, bool)
+        + GetEventByMethodName(name string) (fsm.EnumEvent, bool)
+        + OnEvent(event MapTaskEvent, args ...any) error
+        + DoAction(do <font color=blue>func</font>(*engine.MapMetaData) error) error
+        + BeforeALL(e *fsm.Event) 
+        + AfterALL(e *fsm.Event) 
+        + ExitALL(e *fsm.Event) 
+        + EnterALL(e *fsm.Event) 
+        + AfterClear(e *fsm.Event) 
+        + BeforeUploadImage(e *fsm.Event) 
+        + AfterUploadImage(e *fsm.Event) 
+        + BeforeUploadVideo(e *fsm.Event) 
+        + AfterUploadVideo(e *fsm.Event) 
+        + BeforeUploadMap(e *fsm.Event) 
+        + AfterUploadMap(e *fsm.Event) 
+        + DoInit(e *fsm.Event) 
+        + ExitInit(e *fsm.Event) 
+        + BeforeResume(e *fsm.Event) 
+        + BeforeCommit(e *fsm.Event) 
+        + EnterWaiting(e *fsm.Event) 
+        + DoWaiting(e *fsm.Event) 
+        + ExitWaiting(e *fsm.Event) 
+        + BeforeDecodeSucceed(e *fsm.Event) 
+        + EnterInqueue(e *fsm.Event) 
+        + DoInqueue(e *fsm.Event) 
+        + ExitInqueue(e *fsm.Event) 
+        + EnterBuilding(e *fsm.Event) 
+        + DoBuilding(e *fsm.Event) 
+        + ExitBuilding(e *fsm.Event) 
+        + EnterFailure(e *fsm.Event) 
+        + DoFailure(e *fsm.Event) 
+        + DoSuccess(e *fsm.Event) 
+        + DoForbidden(e *fsm.Event) 
+        + AfterReset(e *fsm.Event) 
+
+    }
+    class MapTaskEvent << (S,Aquamarine) >> {
+        + Event() uint16
+        + String() string
+
+    }
+    class MapTaskStatus << (S,Aquamarine) >> {
+        + State() uint16
+        + String() string
+
+    }
+    class RawDecodeResult << (S,Aquamarine) >> {
+        + FrontID int64
+        + HostAddr string
+        + Images []<font color=blue>struct</font>{*dao.APIFileStorer}
+        + ErrorMsg string
+
+    }
+    class RawUploadInfo << (S,Aquamarine) >> {
+        + RawType int
+        + SouceId int64
+        + URI string
+        + Name string
+        + Index int
+        + SensorType dao.APISensorType
+        + CameraIntrins *dao.CameraIntrinsics
+        + CameraPose *dao.LocalizationPose
+        + Gps *dao.GPSPose
+
+    }
+    class constructionMgr << (S,Aquamarine) >> {
+        - mapInstances *sync.Map
+        - taskParams *sync.Map
+
+    }
+    class task.MapTaskEvent << (T, #FF7700) >>  {
+    }
+    class task.MapTaskStatus << (T, #FF7700) >>  {
+    }
+}
+
+"fsm.Register" <|-- "task.MapConstructer"
+"fsm.EnumEvent" <|-- "task.MapTaskEvent"
+"fsm.EnumState" <|-- "task.MapTaskStatus"
+
+namespace utils {
+    class DataURI << (S,Aquamarine) >> {
+        + MimeType string
+        + Charset string
+        + Encoding string
+        + EncodedData string
+
+        + IsBase64Encoding() bool
+        + IsImage() bool
+        + ImageType() string
+        + String() string
+
+    }
+    class IDGenerator << (S,Aquamarine) >> {
+        - timestamp int64
+        - seq int64
+
+        + GenID() int64
+
+    }
+    class Time << (S,Aquamarine) >> {
+        + UnmarshalJSON(data []byte) error
+        + MarshalJSON() ([]byte, error)
+        + String() string
+
+    }
+    class utils.Time << (T, #FF7700) >>  {
+    }
+    class "time.Time" as timeTime {
+        'This class was created so that we can correctly have an alias pointing to this name. Since it contains dots that can break namespaces
+    }
+}
+
+
+"__builtin__.<font color=blue>map</font>[string]string" #.. "engine.imsRequestErrors"
+"__builtin__.[]float64" #.. "dao.Origin"
+"__builtin__.[]float64" #.. "dao.Quaternion"
+"__builtin__.[]int64" #.. "engine.MapIdArray"
+"__builtin__.[]int64" #.. "pgtb.MapIdArray"
+"__builtin__.byte" #.. "config.EngineMode"
+"__builtin__.byte" #.. "service.EngineMode"
+"__builtin__.float32" #.. "engine.TriDigits"
+"__builtin__.float64" #.. "dao.Scale"
+"__builtin__.int" #.. "dao.APIMapFileType"
+"__builtin__.int" #.. "dao.APIMapSourceType"
+"__builtin__.int" #.. "dao.APIMapStatus"
+"__builtin__.int" #.. "dao.APIMapType"
+"__builtin__.int" #.. "dao.APISensorType"
+"__builtin__.int" #.. "dao.DBMapFileType"
+"__builtin__.int" #.. "dao.DBMapStatus"
+"__builtin__.int" #.. "dao.DBMapType"
+"__builtin__.int" #.. "dao.DBSensorType"
+"__builtin__.int" #.. "engine.LocationTaskStatus"
+"__builtin__.int" #.. "main.MapMetasLoaderTaskState"
+"__builtin__.string" #.. "engine.VideoTaskType"
+"__builtin__.string" #.. "engine.VpsType"
+"__builtin__.string" #.. "storage.StorageSourceType"
+"__builtin__.uint16" #.. "fsm.callbackType"
+"__builtin__.uint16" #.. "task.MapTaskEvent"
+"__builtin__.uint16" #.. "task.MapTaskStatus"
+"dao.DBFileStorer" #.. "dao.APIFileStorer"
+"engine.<font color=blue>func</font>(string, string, string) error" #.. "engine.DownloadCallback"
+"fsm.<font color=blue>func</font>(*Event) " #.. "fsm.Callback"
+"main.fsFileInfo" #.. "main.ArrayFileInfo"
+"pgtb.timeDuration" #.. "pgtb.Duration"
+"utils.timeTime" #.. "utils.Time"
+@enduml
